@@ -40,8 +40,25 @@ jobs:
           additional_permissions: |
             actions: read
 
-          # Optional: Give a custom prompt to Claude. If this is not specified, Claude will perform the instructions specified in the comment that tagged it.
-          # prompt: 'Update the pull request description to include a summary of changes.'
+          # Convención de ramas (ver GITHUB-FLOW.md y issue-formatter.yml).
+          # El action crea por defecto `claude/issue-N-<timestamp>`; el prompt obliga a usar la rama acordada.
+          prompt: |
+            REPO: ${{ github.repository }}
+            ISSUE/PR: #${{ github.event.issue.number || github.event.pull_request.number }}
+
+            Sigue las instrucciones del issue o comentario que te mencionó, con esta regla de ramas:
+
+            1. Nombre de rama obligatorio: `tipo/numero-descripcion-corta`, con tipo en
+               `feature`, `fix`, `docs`, `refactor` o `chore`. Nunca uses el prefijo `claude/`.
+            2. Busca en los comentarios del issue el que empieza por `<!-- issue-formatter -->`
+               (línea "Rama sugerida") y usa exactamente esa rama.
+            3. Si ese comentario no existe, calcula el nombre tú: tipo según el issue
+               (bug/error -> fix, mejora -> feature, documentación -> docs, etc.), el número del issue
+               y 3-6 palabras del título en minúsculas, sin tildes, separadas por guiones.
+            4. Si la rama en la que estás no coincide, crea la correcta desde `main`
+               (`git switch -c <rama> origin/main`), haz ahí los commits y el push.
+            5. Abre el PR desde esa rama e incluye `Closes #<numero>` en la descripción.
+            Si el evento es un PR existente, trabaja en su rama actual y no crees otra.
 
           # Optional: Add claude_args to customize behavior and configuration
           # See https://github.com/anthropics/claude-code-action/blob/main/docs/usage.md

@@ -797,7 +797,7 @@ Este repositorio tiene dos workflows de Claude Code en `.github/workflows/`: `cl
 ### Cómo encaja en el flujo
 
 - Mencionar `@claude` en un issue o en un comentario de PR puede disparar al asistente, que trabaja en una rama propia.
-- Esas ramas llevan un nombre generado, por ejemplo `claude/issue-2-20261006-1735`.
+- Las ramas deben seguir la convención del proyecto (`tipo/numero-descripcion-corta`, la misma que sugiere el issue-formatter), porque `claude.yml` se lo indica en el `prompt`. Sin esa instrucción, el action usa un nombre generado como `claude/issue-2-20261006-1735` (así son las ramas antiguas).
 - El resultado llega como un PR normal: **revísalo igual que el de cualquier persona** antes de mergear.
 
 > **Por qué se revisa igual:** que el cambio lo haya escrito una IA no lo hace automáticamente correcto. El PR es justo el mecanismo que permite decidir qué entra en `main`. Mantener el mismo proceso para personas y para Claude evita crear un camino especial sin revisión.
@@ -806,10 +806,10 @@ Este repositorio tiene dos workflows de Claude Code en `.github/workflows/`: `cl
 
 ```bash
 git fetch
-git checkout claude/issue-2-20261006-1735
+git checkout fix/4-cambiar-color-pieza-j-azul-palido
 ```
 
-Usa el nombre completo, incluido el prefijo `claude/`.
+Usa el nombre completo de la rama, incluido el prefijo (`fix/`, `feature/`... o `claude/` en las ramas antiguas).
 
 > **Por qué `fetch` primero:** la rama la creó una Action en GitHub, no tú. No existe en tu copia local hasta que la descargas. (Ver el [error `pathspec`](#error-pathspec--did-not-match-any-files-known-to-git).)
 

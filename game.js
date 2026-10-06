@@ -40,6 +40,10 @@ const overlayTitle = document.getElementById('overlay-title');
 const overlayScore = document.getElementById('overlay-score');
 const restartBtn = document.getElementById('restart-btn');
 
+const startScreen = document.getElementById('start-screen');
+const startBtn = document.getElementById('start-btn');
+
+let started = false;
 let board, current, next, score, lines, level, paused, gameOver, lastTime, dropAccum, dropInterval, animId;
 
 function createBoard() {
@@ -275,6 +279,10 @@ function init() {
 }
 
 document.addEventListener('keydown', e => {
+  if (!started) {
+    if (e.code === 'Enter') startGame();
+    return;
+  }
   if (e.code === 'KeyP') { togglePause(); return; }
   if (paused || gameOver) return;
   switch (e.code) {
@@ -299,6 +307,12 @@ document.addEventListener('keydown', e => {
   updateHUD();
 });
 
-restartBtn.addEventListener('click', init);
+function startGame() {
+  if (started) return;
+  started = true;
+  startScreen.classList.add('hidden');
+  init();
+}
 
-init();
+restartBtn.addEventListener('click', init);
+startBtn.addEventListener('click', startGame);

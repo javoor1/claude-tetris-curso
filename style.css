@@ -133,7 +133,33 @@ kbd {
   color: #7aa2f7;
 }
 
-#restart-btn {
+/* ---- Pantalla de título ---- */
+.start-screen {
+  background: #0f0f17;
+  z-index: 1;
+}
+
+.start-screen.hidden {
+  display: none;
+}
+
+.game-title {
+  font-size: 56px;
+  font-weight: 900;
+  letter-spacing: 8px;
+  background: linear-gradient(90deg, #4dd0e1, #ba68c8, #e57373, #ffd54f);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.subtitle {
+  font-size: 13px;
+  color: #888;
+}
+
+#restart-btn,
+#start-btn {
   margin-top: 8px;
   background: #7aa2f7;
   color: #0f0f17;
@@ -147,6 +173,7 @@ kbd {
   transition: background 0.15s;
 }
 
-#restart-btn:hover {
+#restart-btn:hover,
+#start-btn:hover {
   background: #9bbdff;
 }

@@ -1,0 +1,132 @@
+name: Issue Formatter
+
+# Normaliza el título, asigna label de tipo y sugiere el nombre de rama
+# (tipo/numero-descripcion-corta) en issues nuevos o editados.
+# Sin IA: reglas deterministas, no consume tokens.
+
+on:
+  issues:
+    types: [opened, edited]
+
+permissions:
+  issues: write
+
+concurrency:
+  group: issue-formatter-${{ github.event.issue.number }}
+  cancel-in-progress: true
+
+jobs:
+  format:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/github-script@v7
+        with:
+          script: |
+            const { owner, repo } = context.repo;
+            const issue = context.payload.issue;
+            const number = issue.number;
+            const MARKER = '<!-- issue-formatter -->';
+
+            // tipo -> label y color (se crea si no existe)
+            const TYPES = {
+              feature:  { label: 'enhancement',   color: 'a2eeef', description: 'Nueva funcionalidad o mejora' },
+              fix:      { label: 'bug',           color: 'd73a4a', description: 'Algo no funciona' },
+              docs:     { label: 'documentation', color: '0075ca', description: 'Mejoras o adiciones a la documentación' },
+              refactor: { label: 'refactor',      color: 'fbca04', description: 'Reestructurar código sin cambiar comportamiento' },
+              chore:    { label: 'chore',         color: 'cfd3d7', description: 'Mantenimiento, configuración, dependencias' },
+            };
+
+            const strip = (s) => s.normalize('NFD').replace(/[̀-ͯ]/g, '');
+
+            // --- 1. Normalizar título -------------------------------------
+            const PREFIX_TYPES = {
+              feat: 'feature', feature: 'feature', fix: 'fix', bug: 'fix', docs: 'docs',
+              doc: 'docs', refactor: 'refactor', chore: 'chore',
+            };
+            let title = issue.title;
+            let prefixType = null;
+            const prefix = title.match(/^\s*(?:\[([^\]]+)\]|([a-zA-Z]+)(?:\([^)]*\))?:)\s*/);
+            if (prefix) {
+              const key = (prefix[1] || prefix[2]).trim().toLowerCase();
+              if (PREFIX_TYPES[key]) {
+                prefixType = PREFIX_TYPES[key];
+                title = title.slice(prefix[0].length);
+              }
+            }
+            title = title.replace(/\s+/g, ' ').trim().replace(/[.\s]+$/, '');
+            if (title) title = title.charAt(0).toUpperCase() + title.slice(1);
+            if (!title) title = issue.title; // nunca dejar el título vacío
+
+            // --- 2. Detectar tipo -----------------------------------------
+            const RULES = [
+              ['docs',     /\b(readme|docs?|documentacion|documentar|documenta|guia|tutorial|comentarios?)\b/],
+              ['fix',      /\b(bug|error(es)?|fallo|falla|crash|roto|rompe|no funciona|arregl\w*|corrig\w*|corrige|fix|colision\w*|incorrect\w*)\b/],
+              ['refactor', /\b(refactor\w*|reestructur\w*|reorganiz\w*|limpiar|simplificar|separar)\b/],
+              ['chore',    /\b(chore|workflow|action|ci|dependenc\w*|config\w*|actualizar version|mantenimiento)\b/],
+              ['feature',  /\b(feature|a[nñ]adir|agregar|agrega|implementar|nuevo|nueva|soporte|add|support)\b/],
+            ];
+            const detect = (text) => {
+              const t = strip(text.toLowerCase());
+              const hit = RULES.find(([, re]) => re.test(t));
+              return hit ? hit[0] : null;
+            };
+            const type = prefixType || detect(title) || detect(issue.body || '') || 'feature';
+
+            // --- 3. Nombre de rama sugerido -------------------------------
+            const STOP = new Set(['de', 'del', 'la', 'el', 'los', 'las', 'un', 'una', 'y', 'the', 'a', 'an', 'of', 'to']);
+            let words = strip(title.toLowerCase())
+              .replace(/[^a-z0-9]+/g, ' ')
+              .trim()
+              .split(' ')
+              .filter((w) => w && !STOP.has(w));
+            let slug = '';
+            for (const w of words) {
+              const next = slug ? `${slug}-${w}` : w;
+              if (next.length > 40 || slug.split('-').length >= 6) break;
+              slug = next;
+            }
+            if (!slug) slug = 'cambio';
+            const branch = `${type}/${number}-${slug}`;
+
+            // --- 4. Aplicar título ----------------------------------------
+            if (title !== issue.title) {
+              await github.rest.issues.update({ owner, repo, issue_number: number, title });
+            }
+
+            // --- 5. Label de tipo (solo si no tiene ninguno gestionado) ---
+            const managed = Object.values(TYPES).map((t) => t.label);
+            const current = issue.labels.map((l) => (typeof l === 'string' ? l : l.name));
+            if (!current.some((n) => managed.includes(n))) {
+              const { label, color, description } = TYPES[type];
+              try {
+                await github.rest.issues.getLabel({ owner, repo, name: label });
+              } catch (e) {
+                if (e.status !== 404) throw e;
+                await github.rest.issues.createLabel({ owner, repo, name: label, color, description });
+              }
+              await github.rest.issues.addLabels({ owner, repo, issue_number: number, labels: [label] });
+            }
+
+            // --- 6. Comentario con rama sugerida (crear o actualizar) -----
+            const body = [
+              MARKER,
+              `**Rama sugerida:** \`${branch}\``,
+              '',
+              '```bash',
+              `gh issue develop ${number} --name ${branch} --checkout`,
+              '# o bien',
+              `git switch -c ${branch}`,
+              '```',
+              '',
+              `Convención: \`tipo/numero-descripcion-corta\` (\`feature\`, \`fix\`, \`docs\`, \`refactor\`, \`chore\`). Al abrir el PR incluye \`Closes #${number}\`.`,
+            ].join('\n');
+
+            const comments = await github.paginate(github.rest.issues.listComments, {
+              owner, repo, issue_number: number, per_page: 100,
+            });
+            const existing = comments.find((c) => c.body && c.body.startsWith(MARKER));
+            if (!existing) {
+              await github.rest.issues.createComment({ owner, repo, issue_number: number, body });
+            } else if (existing.body !== body) {
+              await github.rest.issues.updateComment({ owner, repo, comment_id: existing.id, body });
+            }

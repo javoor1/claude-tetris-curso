@@ -154,13 +154,13 @@ gh issue develop 2 --checkout
 ```bash
 git status
 git add game.js
-git commit -m "Añade manejo de la tecla P para pausar"
+git commit -m "feat: añadir manejo de la tecla P para pausar"
 ```
 
 Recomendaciones:
 
 - Commits pequeños, cada uno con un propósito.
-- Mensajes en imperativo y específicos (ver [convenciones](#4-convenciones)).
+- Mensajes con formato Conventional Commits y específicos (ver [convenciones](#mensajes-de-commit)).
 - Revisa lo que vas a confirmar con `git diff --staged`.
 
 > **Por qué:** cada commit es un punto de guardado al que puedes volver. Si el cuarto commit rompe algo, regresas al tercero sin perder todo el trabajo. `git add` por archivo (y no `git add .` a ciegas) evita colar por accidente archivos que no querías. `git diff --staged` es la última revisión antes de que el cambio quede en el historial.
@@ -276,28 +276,75 @@ Reglas: minúsculas, guiones en lugar de espacios, número de issue al inicio, d
 
 ### Mensajes de commit
 
-Formato sugerido (Conventional Commits simplificado):
+Se usa [Conventional Commits](https://www.conventionalcommits.org/es/v1.0.0/):
 
 ```
-tipo: resumen corto en imperativo (máx. ~50 caracteres)
+tipo(alcance opcional): descripción corta
 
-Cuerpo opcional que explica el porqué, no el qué.
+Cuerpo opcional: qué cambia y, sobre todo, por qué.
+
+Pie opcional: Closes #N
 ```
 
-Ejemplos:
+#### Tipos
+
+Son los mismos que los prefijos de rama, con una excepción: `feature` se escribe `feat` en el commit.
+
+| Rama        | Commit      | Uso                                          |
+|-------------|-------------|----------------------------------------------|
+| `feature/`  | `feat`      | Funcionalidad nueva                          |
+| `fix/`      | `fix`       | Corrección de un bug                         |
+| `refactor/` | `refactor`  | Cambio interno sin cambiar el comportamiento |
+| `docs/`     | `docs`      | Solo documentación                           |
+| `chore/`    | `chore`     | Mantenimiento, workflows, configuración      |
+
+#### Reglas de la primera línea
+
+1. Máximo 72 caracteres.
+2. Tipo en minúscula, seguido de `: `.
+3. Verbo en infinitivo y en español (`añadir`, `corregir`, `cambiar`). Elige un estilo y úsalo siempre.
+4. Sin punto final.
+5. Describe **qué hace** el cambio, no cómo lo hiciste: "corregir loop activo tras game over", no "cambiar if en loop".
+6. Un commit, un cambio lógico. Si el mensaje necesita una "y", probablemente son dos commits.
+
+#### Cuerpo y pie
+
+- **Cuerpo:** úsalo cuando el porqué no sea obvio. Sepáralo del título con una línea en blanco y escríbelo en párrafos cortos.
+- **Pie:** enlaza el issue con `Closes #N`. Se cierra solo al hacer merge en `main`. Pon el número en el pie y no en el título (`(#4)`), para que el título quede limpio. El número debe coincidir con el de la rama.
+- **Alcance (opcional):** en este proyecto casi no hace falta. Si lo usas, que sea corto: `fix(loop)`, `chore(ci)`, `docs(flow)`.
+- **Cambios incompatibles:** añade `!` tras el tipo (`feat!: ...`) y explica el cambio en el cuerpo con `BREAKING CHANGE:`. En un proyecto personal casi nunca hará falta.
+
+#### Ejemplos
 
 ```
-feat: añade pausa con la tecla P
-fix: corrige colisión de la pieza en el borde derecho
-docs: documenta los controles en el README
+feat: añadir pausa con la tecla P
+fix: cambiar color de la pieza J a azul pálido
+docs: documentar los controles en el README
+chore: forzar convención de ramas en claude.yml
 ```
+
+Con cuerpo y pie:
+
+```
+fix: detener el loop al terminar la partida
+
+loop() reprogramaba requestAnimationFrame aunque endGame() ya
+había corrido, así que seguían apareciendo piezas tras GAME OVER.
+
+Closes #6
+```
+
+Evita mensajes sin tipo o sin información, como `claude.md` o `actualización del doc`. Mejor `docs: añadir CLAUDE.md` y `docs: actualizar GITHUB-FLOW.md`.
 
 > **Por qué:**
 >
 > - **Resumen corto:** `git log --oneline` muestra una línea por commit. Si es larga, se corta y deja de ser útil.
-> - **Imperativo** ("añade", no "añadido"): lee como una instrucción de lo que el commit *hace* al aplicarse, y es el estilo del propio Git (`Merge branch...`, `Revert...`).
+> - **Verbo en infinitivo:** el título responde a "este commit sirve para...". Da igual el modo verbal que elijas, lo importante es no mezclar estilos.
 > - **Explicar el porqué en el cuerpo:** el *qué* ya lo muestra el diff. Lo que se pierde con el tiempo es la razón, y es lo que más necesitarás cuando preguntes "¿por qué se hizo así?".
 > - **Prefijo de tipo:** permite filtrar el historial (`git log --grep "^fix"`) y generar changelogs automáticamente.
+> - **`Closes #N` en el pie:** deja el vínculo commit-issue de forma que GitHub lo entiende, sin ensuciar el título.
+> - **Con squash merge** (la política recomendada aquí), el título del PR se convierte en el mensaje del commit en `main`. Escribe el título del PR con este mismo formato.
+> - **Los commits antiguos no se reescriben:** el historial ya está publicado y reescribirlo causaría más problemas de los que resuelve.
 
 ### Descripción de un PR
 

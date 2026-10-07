@@ -43,7 +43,7 @@ feature     ●──●──●──●──●──●────●   (P
 | Regla | Qué problema resuelve |
 |-------|-----------------------|
 | `main` siempre estable | Si `main` se rompe, nadie puede partir de una base fiable ni desplegar. Una `main` sana significa que siempre puedes abrir `index.html` y jugar. |
-| Todo cambio en una rama nueva | Aísla el trabajo a medias. Puedes experimentar, equivocarte y abandonar sin afectar a nadie. Sin ramas, cada commit a medio hacer queda en la versión "oficial". |
+| Todo cambio en una rama nueva | Aísla el trabajo a medias. Puedes experimentar, equivocarte y abandonar sin afectar a nadie. Sin ramas, cada commit a medio hacer quedaría en la versión "oficial", lo cual sería terrible. |
 | Nombre descriptivo | Con 10 ramas abiertas, `prueba2` no dice nada. Un buen nombre te dice qué contiene sin abrirla. |
 | Commits pequeños y frecuentes | Si algo sale mal, puedes volver a un punto cercano. Un commit gigante que mezcla cinco cosas es imposible de revisar o deshacer parcialmente. |
 | Pull Request | Es el punto de revisión: otra persona (o tú mismo, con calma) ve el cambio completo antes de que entre a `main`. Atrapa errores y deja registro de la discusión. |

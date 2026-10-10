@@ -43,6 +43,13 @@ const restartBtn = document.getElementById('restart-btn');
 const startScreen = document.getElementById('start-screen');
 const startBtn = document.getElementById('start-btn');
 
+const recordsStart = document.getElementById('records-start');
+const recordsOver = document.getElementById('records-over');
+const recordsOverTable = document.getElementById('records-over-table');
+const nameForm = document.getElementById('name-form');
+const nameInput = document.getElementById('name-input');
+const resetRecordsBtn = document.getElementById('reset-records-btn');
+
 let started = false;
 let board, current, next, score, lines, level, paused, gameOver, lastTime, dropAccum, dropInterval, animId;
 
@@ -114,6 +121,7 @@ function clearLines() {
     dropInterval = Math.max(100, 1000 - (level - 1) * 90);
     updateHUD();
   }
+  return cleared;
 }
 
 function ghostY() {
@@ -141,7 +149,7 @@ function softDrop() {
 
 function lockPiece() {
   merge();
-  clearLines();
+  Records.onLock(clearLines());
   spawn();
 }
 
@@ -231,6 +239,18 @@ function endGame() {
   overlayTitle.textContent = 'GAME OVER';
   overlayScore.textContent = `Puntuación: ${score.toLocaleString()}`;
   overlay.classList.remove('hidden');
+  showGameOverRecords();
+}
+
+function showGameOverRecords() {
+  const qualifies = Records.endRun(score, lines);
+  Records.render(recordsOverTable, Records.pendingRank());
+  nameForm.classList.toggle('hidden', !qualifies);
+  recordsOver.classList.remove('hidden');
+  if (qualifies) {
+    nameInput.value = '';
+    nameInput.focus();
+  }
 }
 
 function togglePause() {
@@ -264,6 +284,9 @@ function loop(ts) {
 }
 
 function init() {
+  Records.startRun();
+  recordsOver.classList.add('hidden');
+  nameForm.classList.add('hidden');
   board = createBoard();
   score = 0;
   lines = 0;
@@ -282,6 +305,7 @@ function init() {
 }
 
 document.addEventListener('keydown', e => {
+  if (e.target instanceof HTMLInputElement) return; // escribir el nombre no mueve piezas
   if (!started) {
     if (e.code === 'Enter') startGame();
     return;
@@ -319,3 +343,20 @@ function startGame() {
 
 restartBtn.addEventListener('click', init);
 startBtn.addEventListener('click', startGame);
+
+// El input de nombre no debe disparar los controles del juego.
+nameInput.addEventListener('keydown', e => e.stopPropagation());
+nameForm.addEventListener('submit', e => {
+  e.preventDefault();
+  const rank = Records.submit(nameInput.value);
+  Records.render(recordsOverTable, rank);
+  nameForm.classList.add('hidden');
+  restartBtn.focus();
+});
+resetRecordsBtn.addEventListener('click', () => {
+  if (!confirm('¿Seguro que quieres borrar todos los records?')) return;
+  Records.reset();
+  Records.render(recordsStart);
+});
+resetRecordsBtn.addEventListener('keydown', e => e.stopPropagation());
+Records.render(recordsStart);

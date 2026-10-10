@@ -12,7 +12,7 @@ Open `index.html` directly, or serve the folder statically (e.g. `python -m http
 
 ## Architecture
 
-Three files: `index.html` (DOM, two canvases), `style.css`, and `game.js` (all logic, loaded as a classic script, `'use strict'`).
+Four files: `index.html` (DOM, two canvases), `style.css`, `records.js` (local records table in `localStorage` key `tetris.records`; global `Records`, must load before `game.js`) and `game.js` (all game logic, loaded as a classic script, `'use strict'`). `lockPiece()` feeds combo tracking via `Records.onLock(clearLines())`; `endGame()` calls `Records.endRun()`.
 
 `game.js` uses module-level mutable state declared on one `let` line (`board`, `current`, `next`, `score`, `lines`, `level`, `paused`, `gameOver`, `lastTime`, `dropAccum`, `dropInterval`, `animId`). `init()` resets all of it and is also the restart handler.
 

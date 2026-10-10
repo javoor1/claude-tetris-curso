@@ -12,7 +12,7 @@ Open `index.html` directly, or serve the folder statically (e.g. `python -m http
 
 ## Architecture
 
-Three files: `index.html` (DOM, two canvases), `style.css`, and `game.js` (all logic, loaded as a classic script, `'use strict'`).
+Four files: `index.html` (DOM, two canvases), `style.css`, `themes.js` (skins: `THEMES` with palette, grid color and `drawBlock` per theme; persisted in `localStorage` key `tetris.skin`; must load before `game.js`) and `game.js` (all game logic, loaded as a classic script, `'use strict'`). `drawBlock`/`drawGrid` in `game.js` delegate to `activeTheme()`; `COLORS` is just the Retro palette.
 
 `game.js` uses module-level mutable state declared on one `let` line (`board`, `current`, `next`, `score`, `lines`, `level`, `paused`, `gameOver`, `lastTime`, `dropAccum`, `dropInterval`, `animId`). `init()` resets all of it and is also the restart handler.
 

@@ -4,16 +4,8 @@ const COLS = 10;
 const ROWS = 20;
 const BLOCK = 30;
 
-const COLORS = [
-  null,
-  '#4dd0e1', // I - cyan
-  '#ffd54f', // O - yellow
-  '#ba68c8', // T - purple
-  '#81c784', // S - green
-  '#e57373', // Z - red
-  '#90caf9', // J - pale blue
-  '#ffb74d', // L - orange
-];
+// Paleta por defecto (Retro); los temas viven en themes.js
+const COLORS = THEMES.retro.palette;
 
 const PIECES = [
   null,
@@ -42,6 +34,7 @@ const restartBtn = document.getElementById('restart-btn');
 
 const startScreen = document.getElementById('start-screen');
 const startBtn = document.getElementById('start-btn');
+const skinSelect = document.getElementById('skin-select');
 
 let started = false;
 let board, current, next, score, lines, level, paused, gameOver, lastTime, dropAccum, dropInterval, animId;
@@ -162,18 +155,11 @@ function updateHUD() {
 
 function drawBlock(context, x, y, colorIndex, size, alpha) {
   if (!colorIndex) return;
-  const color = COLORS[colorIndex];
-  context.globalAlpha = alpha ?? 1;
-  context.fillStyle = color;
-  context.fillRect(x * size + 1, y * size + 1, size - 2, size - 2);
-  // highlight
-  context.fillStyle = 'rgba(255,255,255,0.12)';
-  context.fillRect(x * size + 1, y * size + 1, size - 2, 4);
-  context.globalAlpha = 1;
+  activeTheme().drawBlock(context, x, y, colorIndex, size, alpha);
 }
 
 function drawGrid() {
-  ctx.strokeStyle = '#22222e';
+  ctx.strokeStyle = activeTheme().grid;
   ctx.lineWidth = 0.5;
   for (let c = 1; c < COLS; c++) {
     ctx.beginPath();
@@ -223,6 +209,13 @@ function drawNext() {
   for (let r = 0; r < shape.length; r++)
     for (let c = 0; c < shape[r].length; c++)
       drawBlock(nextCtx, offX + c, offY + r, shape[r][c], NB);
+}
+
+// Redibuja tablero y NEXT (cambio de skin en caliente, también en pausa o antes de empezar)
+function refreshView() {
+  if (!board || !current || !next) return;
+  draw();
+  drawNext();
 }
 
 function endGame() {
@@ -282,6 +275,12 @@ function init() {
 }
 
 document.addEventListener('keydown', e => {
+  // el select de skin no debe competir con los controles del juego
+  if (e.target === skinSelect) {
+    if (e.code === 'Tab') return;
+    skinSelect.blur();
+    e.preventDefault();
+  }
   if (!started) {
     if (e.code === 'Enter') startGame();
     return;

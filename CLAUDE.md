@@ -19,7 +19,8 @@ Three files: `index.html` (DOM, two canvases), `style.css`, and `game.js` (all l
 Key flow:
 - `loop(ts)` (rAF) accumulates `dropAccum`; on `dropInterval` it moves the piece down or calls `lockPiece()`, then `draw()`.
 - `lockPiece()` = `merge()` -> `clearLines()` -> `spawn()`. `spawn()` promotes `next` to `current` and triggers `endGame()` if the new piece collides immediately.
-- `clearLines()` owns level and speed: `level = floor(lines/10)+1`, `dropInterval = max(100, 1000 - (level-1)*90)`.
+- `clearLines()` owns level and speed: `level = baseLevel + floor(lines/10)`, `dropInterval = speedForLevel(level)` (`max(100, 1000 - (level-1)*90)`). `baseLevel` is a per-game snapshot of `startLevel` taken in `init()`.
+- `pause.js` (loaded before `game.js`) owns the `#pause-menu` overlay and the `startLevel` global (1-10, applies to the next game). `game.js` calls `showPauseMenu()` / `hidePauseMenu()`; P and Escape toggle pause, and game keys are blocked while paused.
 - Soft drop and hard drop award points outside `clearLines()` (1 per row, 2 per row).
 - Pause and game over both cancel the rAF (`cancelAnimationFrame(animId)`); `togglePause()` restarts the loop by calling `loop()` directly after resetting `lastTime`.
 

@@ -70,6 +70,28 @@ body {
   border-radius: 4px;
 }
 
+#skin-select {
+  background: #22223a;
+  color: #ccc;
+  border: 1px solid #3a3a5a;
+  border-radius: 4px;
+  padding: 5px 8px;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+body[data-skin="neon"] #board,
+body[data-skin="neon"] #next-canvas {
+  border-color: #00fff2;
+  box-shadow: 0 0 16px rgba(0, 255, 242, 0.5);
+}
+
+body[data-skin="pastel"] #board,
+body[data-skin="pastel"] #next-canvas {
+  border-color: #e6d3c3;
+  border-radius: 12px;
+}
+
 /* ---- Controles ---- */
 .controls ul {
   list-style: none;

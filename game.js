@@ -35,6 +35,7 @@ const restartBtn = document.getElementById('restart-btn');
 const startScreen = document.getElementById('start-screen');
 const startBtn = document.getElementById('start-btn');
 const skinSelect = document.getElementById('skin-select');
+const bgToggle = document.getElementById('bg-toggle');
 
 const recordsStart = document.getElementById('records-start');
 const recordsOver = document.getElementById('records-over');
@@ -171,7 +172,7 @@ function drawBlock(context, x, y, colorIndex, size, alpha) {
 }
 
 function drawGrid() {
-  ctx.strokeStyle = activeTheme().grid;
+  ctx.strokeStyle = lightBg ? 'rgba(0, 0, 0, 0.12)' : activeTheme().grid;
   ctx.lineWidth = 0.5;
   for (let c = 1; c < COLS; c++) {
     ctx.beginPath();
@@ -304,9 +305,9 @@ function init() {
 
 document.addEventListener('keydown', e => {
   // el select de skin no debe competir con los controles del juego
-  if (e.target === skinSelect) {
+  if (e.target === skinSelect || e.target === bgToggle) {
     if (e.code === 'Tab') return;
-    skinSelect.blur();
+    e.target.blur();
     e.preventDefault();
   }
   if (e.target instanceof HTMLInputElement) return; // escribir el nombre no mueve piezas

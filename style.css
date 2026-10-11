@@ -354,3 +354,51 @@ body.skin-pixel #next-canvas { image-rendering: pixelated; border-radius: 0; }
 .link-btn:hover {
   color: #e57373;
 }
+
+/* ---- Toggle de fondo ---- */
+.bg-toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: fit-content;
+  background: #22223a;
+  color: #e0e0e0;
+  border: 1px solid #3a3a5a;
+  border-radius: 14px;
+  padding: 3px 10px 3px 3px;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.bg-toggle-knob {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #7aa2f7;
+  transition: transform 0.15s;
+}
+
+.bg-toggle[aria-checked="false"] .bg-toggle-knob {
+  background: #f5c542;
+}
+
+.bg-toggle:focus-visible {
+  outline: 2px solid #7aa2f7;
+  outline-offset: 2px;
+}
+
+/* ---- Fondo claro (después de los skins; el selector extra gana en especificidad) ---- */
+html body.mode-light {
+  --board-bg: #f4f4f8;
+  --board-border: #c4c4d4;
+  background: #e2e2ea;
+  color: #22222e;
+}
+
+html body.mode-light .value { color: #3b5bdb; }
+html body.mode-light .label { color: #6a6a85; }
+html body.mode-light .controls li { color: #55556a; }
+html body.mode-light kbd { background: #fff; border-color: #c4c4d4; color: #444; }
+html body.mode-light #board { box-shadow: 0 0 40px rgba(0, 0, 0, 0.15); }
+html body.mode-light #skin-select,
+html body.mode-light .bg-toggle { background: #fff; color: #22222e; border-color: #c4c4d4; }

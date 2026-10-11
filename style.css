@@ -177,3 +177,104 @@ kbd {
 #start-btn:hover {
   background: #9bbdff;
 }
+
+/* ---- Records ---- */
+.records {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  width: 220px;
+  margin-top: 8px;
+}
+
+.records-list {
+  list-style: none;
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 13px;
+  color: #aaa;
+}
+
+.records-list li {
+  display: flex;
+  justify-content: space-between;
+  padding: 2px 6px;
+  border-radius: 3px;
+}
+
+.records-list li.empty {
+  color: #555570;
+  justify-content: center;
+}
+
+.records-list li.highlight {
+  background: #ffd54f;
+  color: #0f0f17;
+  font-weight: 700;
+}
+
+.records-extra {
+  font-size: 11px;
+  color: #888;
+}
+
+.reset-records-btn {
+  background: transparent;
+  color: #e57373;
+  border: 1px solid #e57373;
+  border-radius: 4px;
+  padding: 4px 8px;
+  font-size: 11px;
+  cursor: pointer;
+}
+
+.reset-records-btn:hover {
+  background: rgba(229, 115, 115, 0.15);
+}
+
+.gameover-only {
+  display: none;
+}
+
+.is-gameover .gameover-only {
+  display: flex;
+}
+
+#record-msg {
+  font-size: 13px;
+  color: #ffd54f;
+}
+
+#record-msg:empty,
+#overlay:not(.is-gameover) #record-msg {
+  display: none;
+}
+
+#name-form {
+  display: flex;
+  gap: 6px;
+}
+
+#name-form.hidden {
+  display: none;
+}
+
+#name-input {
+  background: #1a1a25;
+  color: #e0e0e0;
+  border: 1px solid #3a3a5a;
+  border-radius: 4px;
+  padding: 6px 8px;
+  font-size: 13px;
+  width: 140px;
+  user-select: text;
+}
+
+#save-record-btn {
+  background: #7aa2f7;
+  color: #0f0f17;
+  border: none;
+  border-radius: 4px;
+  padding: 6px 12px;
+  font-weight: 700;
+  cursor: pointer;
+}

@@ -158,3 +158,33 @@ function applySkin(name, persist) {
   try { saved = localStorage.getItem(SKIN_KEY); } catch (e) { /* ignorar */ }
   applySkin(saved || DEFAULT_SKIN, false);
 })();
+
+// ---- Fondo claro / oscuro ----
+const BG_KEY = 'tetris.bg';
+let lightBg = false;
+
+function applyBackground(light, persist) {
+  lightBg = !!light;
+  document.body.classList.toggle('mode-light', lightBg);
+  const btn = document.getElementById('bg-toggle');
+  const txt = document.getElementById('bg-toggle-text');
+  if (btn) btn.setAttribute('aria-checked', String(!lightBg));
+  if (txt) txt.textContent = lightBg ? 'Claro' : 'Oscuro';
+  if (persist) {
+    try { localStorage.setItem(BG_KEY, lightBg ? 'light' : 'dark'); } catch (e) { /* sin almacenamiento */ }
+  }
+  if (typeof refreshView === 'function') refreshView();
+}
+
+(function initBackground() {
+  const btn = document.getElementById('bg-toggle');
+  if (btn) {
+    btn.addEventListener('click', () => {
+      applyBackground(!lightBg, true);
+      btn.blur(); // evita que Espacio/Enter del juego vuelvan a activar el toggle
+    });
+  }
+  let saved = null;
+  try { saved = localStorage.getItem(BG_KEY); } catch (e) { /* ignorar */ }
+  applyBackground(saved === 'light', false);
+})();
